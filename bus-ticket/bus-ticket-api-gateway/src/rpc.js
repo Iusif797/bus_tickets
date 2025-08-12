@@ -6,43 +6,51 @@ let sessionCookie = null;
 let lastAuthAt = 0;
 
 function ensureEnv() {
-    const { ODOO_URL, ODOO_DB, ODOO_LOGIN, ODOO_API_KEY } = process.env;
-    if (!ODOO_URL || !ODOO_DB || !ODOO_LOGIN || !ODOO_API_KEY) {
-        const err = new Error('Odoo credentials are not configured');
+    const { ODOO_URL, ODOO_DB, ODOO_LOGIN } = process.env;
+    if (!ODOO_URL || !ODOO_DB || !ODOO_LOGIN) {
+        const err = new Error('Odoo connection is not configured: ODOO_URL/ODOO_DB/ODOO_LOGIN are required');
         err.status = 500;
         throw err;
     }
-    return { ODOO_URL, ODOO_DB, ODOO_LOGIN, ODOO_API_KEY };
+    return { ODOO_URL, ODOO_DB, ODOO_LOGIN };
 }
 
 async function odooAuth() {
-    const { ODOO_URL, ODOO_DB, ODOO_LOGIN, ODOO_API_KEY } = ensureEnv();
+    const { ODOO_URL, ODOO_DB, ODOO_LOGIN } = ensureEnv();
+    const { ODOO_API_KEY, ODOO_PASSWORD } = process.env;
+    const password = ODOO_API_KEY || ODOO_PASSWORD;
+    if (!password) {
+        const err = new Error('No ODOO_API_KEY or ODOO_PASSWORD provided');
+        err.status = 500;
+        throw err;
+    }
+
     if (sessionCookie && Date.now() - lastAuthAt < 10 * 60 * 1000) {
         return sessionCookie;
     }
+
     const url = new URL('/web/session/authenticate', ODOO_URL).toString();
-    try {
-        const payload = {
-            jsonrpc: '2.0',
-            params: { db: ODOO_DB, login: ODOO_LOGIN, password: ODOO_API_KEY },
-        };
-        const resp = await axios.post(url, payload, {
-            headers: { 'Content-Type': 'application/json' },
-        });
-        const setCookie = resp.headers['set-cookie'];
-        if (!setCookie || !setCookie.length) {
-            const e = new Error('Failed to authenticate to Odoo');
-            e.status = 401;
-            throw e;
-        }
-        sessionCookie = setCookie.map((c) => c.split(';')[0]).join('; ');
-        lastAuthAt = Date.now();
-        return sessionCookie;
-    } catch (err) {
-        const e = new Error('Odoo authentication failed');
+    const payload = { jsonrpc: '2.0', params: { db: ODOO_DB, login: ODOO_LOGIN, password } };
+    const resp = await axios.post(url, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        validateStatus: (s) => s < 500,
+    });
+
+    const setCookie = resp.headers['set-cookie'];
+    if (!setCookie || !setCookie.length) {
+        const e = new Error('Failed to get Odoo session cookie');
         e.status = 401;
         throw e;
     }
+    if (resp.data && resp.data.error) {
+        const e = new Error(JSON.stringify(resp.data.error));
+        e.status = 401;
+        throw e;
+    }
+
+    sessionCookie = setCookie.map((c) => c.split(';')[0]).join('; ');
+    lastAuthAt = Date.now();
+    return sessionCookie;
 }
 
 async function callKw({ model, method, args = [], kwargs = {} }) {
