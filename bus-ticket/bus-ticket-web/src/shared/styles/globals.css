@@ -1,0 +1,92 @@
+:root{
+  --bg:#0b0f1a;
+  --card:#11182a99;
+  --muted:#aab4c3;
+  --text:#eaf0ff;
+  --accent:linear-gradient(135deg,#6ea8ff,#9a7cff);
+  --ring:rgba(110,168,255,.4);
+
+  /* spacing & radii */
+  --space-1:6px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --radius-1:12px;
+  --radius-2:16px;
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1000px 600px at 20% 0%,#15203c,transparent),
+    radial-gradient(800px 600px at 100% 100%,#1f2c52,transparent),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+.a{color:inherit}
+.container{max-width:1100px;margin:0 auto;padding:24px;padding-block:24px}
+.card{
+  backdrop-filter:saturate(180%) blur(12px);
+  background:var(--card);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--radius-2);
+  box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.h1{font-size:28px;margin:0 0 var(--space-2)}
+.h2{font-size:18px;margin:0 0 var(--space-2);color:var(--muted)}
+.row{display:flex;gap:var(--space-4);flex-wrap:wrap}
+.row > *{flex:1 1 260px;min-width:220px}
+.grid{display:grid;gap:var(--space-3)}
+.field{display:grid;gap:var(--space-2)}
+.label{font-size:12px;color:var(--muted);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);width:max-content}
+.input,select{
+  width:100%;
+  padding:12px 14px;
+  border-radius:var(--radius-1);
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  outline:none
+}
+.input:focus,select:focus{box-shadow:0 0 0 4px var(--ring);border-color:transparent}
+.input::placeholder{color:#b8c4d6}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:12px 16px;border-radius:var(--radius-1);border:0;
+  background-image:var(--accent);
+  color:#0b0f1a;font-weight:600;cursor:pointer;
+  transition:transform .08s ease,box-shadow .2s ease,opacity .2s ease,background .2s ease;
+  box-shadow:0 10px 25px rgba(110,168,255,.35)
+}
+.btn:hover{box-shadow:0 14px 32px rgba(110,168,255,.42)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
+.btn.secondary{background:rgba(255,255,255,.06);color:var(--text);border:1px solid rgba(255,255,255,.12);box-shadow:none}
+.btn.secondary:hover{background:rgba(255,255,255,.1)}
+.btn.ghost{background:transparent;color:#cbe0ff;border:1px solid rgba(255,255,255,.08);box-shadow:none}
+.btn.ghost:hover{background:rgba(255,255,255,.05)}
+.btn.lg{padding:14px 18px}
+.btn.full{width:100%}
+.btn .spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.55);border-right-color:transparent;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.badge{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--muted)}
+.list{display:grid;gap:var(--space-3)}
+.list.cards{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.separator{height:1px;background:rgba(255,255,255,.08);margin:var(--space-3) 0}
+.actions{display:flex;justify-content:flex-end;margin-top:var(--space-3)}
+.seat{width:44px;height:44px;border-radius:var(--radius-1);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
+.seat.free{background:linear-gradient(180deg,rgba(69,255,169,.2),rgba(69,255,169,.05));}
+.seat.occupied{background:linear-gradient(180deg,rgba(255,84,84,.2),rgba(255,84,84,.05));color:#ff6b6b}
+.seat.hold{background:linear-gradient(180deg,rgba(255,199,84,.2),rgba(255,199,84,.05));color:#ffd36b}
+.seat.selected{outline:3px solid rgba(110,168,255,.6);outline-offset:0}
+.link{color:#cbe0ff;text-decoration:none;text-underline-offset:3px}
+.link:hover{text-decoration:underline}
+
+
+
