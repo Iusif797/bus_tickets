@@ -17,7 +17,12 @@ const HomePage: React.FC = () => {
     return (
         <div className="container">
             <div style={{ margin: '12vh 0 16px' }}>
-                <h1 className="h1">Bus Ticket</h1>
+                <h1 className="h1" style={{
+                    background: 'linear-gradient(135deg,#cfe3ff,#cabdff)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent'
+                }}>Bus Ticket</h1>
                 <div className="h2">Поиск рейсов и покупка билетов</div>
             </div>
             <SearchForm values={values} onChange={setValues} onSubmit={handleSubmit} />
