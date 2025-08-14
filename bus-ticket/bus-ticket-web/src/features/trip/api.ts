@@ -8,3 +8,4 @@ export function fetchTrip(id: number): Promise<TripDetail> {
 
 
 
+

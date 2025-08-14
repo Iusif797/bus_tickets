@@ -16,14 +16,15 @@ const TripCard: React.FC<{ trip: Trip }> = ({ trip }) => {
                     <div style={{ marginTop: 8, fontWeight: 700 }}>{formatPrice(trip.priceFrom)}</div>
                 </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Link className="link" to={`/trip/${trip.id}`}>Детали и выбор места →</Link>
+            <div className="actions" style={{ marginTop: 0 }}>
+                <Link className="btn ghost" to={`/trip/${trip.id}`}>Детали и выбор места</Link>
             </div>
         </div>
     );
 };
 
 export default TripCard;
+
 
 
 

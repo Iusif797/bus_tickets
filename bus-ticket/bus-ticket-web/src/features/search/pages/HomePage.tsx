@@ -16,7 +16,7 @@ const HomePage: React.FC = () => {
 
     return (
         <div className="container">
-            <div style={{ margin: '20vh 0 16px' }}>
+            <div style={{ margin: '12vh 0 16px' }}>
                 <h1 className="h1">Bus Ticket</h1>
                 <div className="h2">Поиск рейсов и покупка билетов</div>
             </div>

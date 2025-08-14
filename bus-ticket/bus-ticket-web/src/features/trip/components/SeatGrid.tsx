@@ -10,7 +10,7 @@ type Props = {
 const SeatGrid: React.FC<Props> = ({ seats, selected, onSelect }) => {
     const columns = 4;
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: 8 }}>
+        <div className="seat-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
             {seats.map((s) => {
                 const isSelected = selected === s.seat_no;
                 const disabled = s.status !== 'free';

@@ -29,17 +29,50 @@ router.get(
                 .json({ error: { message: 'date is required', code: 400 }, traceId: res.locals.traceId });
         }
         const domain = [['date', '=', date]];
+        // Валидация маршрута по остановкам специфична модели Odoo; оставляем фильтр по дате.
         const trips = await callKw({
             model: 'bus.trip',
             method: 'search_read',
             args: [domain],
             kwargs: {
-                fields: ['id', 'date', 'sell_enabled', 'free_seats', 'capacity'],
+                fields: ['id', 'date', 'sell_enabled', 'free_seats', 'capacity', 'price_from', 'base_price'],
                 limit: 100,
                 order: 'date asc',
             },
         });
-        const enriched = (trips || []).map((t) => ({ ...t, priceFrom: 0 })); // TODO: база + правила
+
+        const tripIds = (trips || []).map((t) => t.id).filter(Boolean);
+        const priceMinByTrip = {};
+        if (tripIds.length > 0) {
+            try {
+                const groups = await callKw({
+                    model: 'bus.price.rule',
+                    method: 'read_group',
+                    args: [[['trip_id', 'in', tripIds]], ['price:min'], ['trip_id']],
+                    kwargs: {},
+                });
+                if (Array.isArray(groups)) {
+                    for (const g of groups) {
+                        const trip = Array.isArray(g.trip_id) ? g.trip_id[0] : g.trip_id;
+                        const minPrice = g['price_min'] ?? g['price:min'] ?? g.price;
+                        if (trip && typeof minPrice === 'number') priceMinByTrip[trip] = minPrice;
+                    }
+                }
+            } catch (_) {
+                // если модели правил нет — просто пропустим
+            }
+        }
+
+        const enriched = (trips || []).map((t) => ({
+            ...t,
+            priceFrom:
+                typeof t.price_from === 'number'
+                    ? t.price_from
+                    : typeof t.base_price === 'number'
+                        ? t.base_price
+                        : priceMinByTrip[t.id] ?? 0,
+        }));
+
         res.json({ data: enriched, traceId: res.locals.traceId });
     })
 );
@@ -80,7 +113,7 @@ router.get(
         const tripArr = await callKw({
             model: 'bus.trip',
             method: 'read',
-            args: [[id], ['id', 'date', 'status', 'free_seats', 'capacity', 'vehicle_id']],
+            args: [[id], ['id', 'date', 'status', 'free_seats', 'capacity', 'vehicle_id', 'base_price', 'price_from']],
             kwargs: {},
         });
         const trip = Array.isArray(tripArr) ? tripArr[0] : tripArr;
@@ -92,6 +125,7 @@ router.get(
 
         let seats = [];
         try {
+            // 1) Пробуем конкретную карту рейса
             const mapsByTrip = await callKw({
                 model: 'bus.seat.map',
                 method: 'search_read',
@@ -99,6 +133,8 @@ router.get(
                 kwargs: { fields: ['layout_json'], limit: 1 },
             });
             let layout = mapsByTrip?.[0]?.layout_json;
+
+            // 2) Если нет, пробуем карту по транспортному средству
             if (!layout && trip.vehicle_id && Array.isArray(trip.vehicle_id)) {
                 const vehicleId = trip.vehicle_id[0];
                 const mapsByVehicle = await callKw({
@@ -109,17 +145,15 @@ router.get(
                 });
                 layout = mapsByVehicle?.[0]?.layout_json;
             }
+
+            // 3) Если есть layout, парсим и уважаем статусы
             if (layout) {
-                try {
-                    const parsed = typeof layout === 'string' ? JSON.parse(layout) : layout;
-                    if (Array.isArray(parsed?.seats)) {
-                        seats = parsed.seats.map((s, idx) => ({
-                            seat_no: s.seat_no || s.number || idx + 1,
-                            status: s.status || 'free',
-                        }));
-                    }
-                } catch (_) {
-                    // ignore
+                const parsed = typeof layout === 'string' ? JSON.parse(layout) : layout;
+                if (Array.isArray(parsed?.seats)) {
+                    seats = parsed.seats.map((s, idx) => ({
+                        seat_no: s.seat_no || s.number || idx + 1,
+                        status: s.status || 'free',
+                    }));
                 }
             }
         } catch (_) {
@@ -139,6 +173,7 @@ router.get(
                 capacity: trip.capacity,
                 vehicle_id: trip.vehicle_id,
                 seats,
+                priceFrom: typeof trip.price_from === 'number' ? trip.price_from : (trip.base_price || 0),
             },
             traceId: res.locals.traceId,
         });

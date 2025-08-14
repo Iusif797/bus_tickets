@@ -12,6 +12,7 @@
   --space-3:12px;
   --space-4:16px;
   --space-5:20px;
+  --space-6:24px;
   --radius-1:12px;
   --radius-2:16px;
 }
@@ -37,7 +38,9 @@ body{
   border:1px solid rgba(255,255,255,.06);
   border-radius:var(--radius-2);
   box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);
+  transition:transform .12s ease, box-shadow .2s ease;
 }
+.card:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05)}
 .h1{font-size:28px;margin:0 0 var(--space-2)}
 .h2{font-size:18px;margin:0 0 var(--space-2);color:var(--muted)}
 .row{display:flex;gap:var(--space-4);flex-wrap:wrap}
@@ -77,7 +80,7 @@ body{
 @keyframes spin{to{transform:rotate(360deg)}}
 .badge{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--muted)}
 .list{display:grid;gap:var(--space-3)}
-.list.cards{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.list.cards{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .separator{height:1px;background:rgba(255,255,255,.08);margin:var(--space-3) 0}
 .actions{display:flex;justify-content:flex-end;margin-top:var(--space-3)}
 .seat{width:44px;height:44px;border-radius:var(--radius-1);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
@@ -87,6 +90,28 @@ body{
 .seat.selected{outline:3px solid rgba(110,168,255,.6);outline-offset:0}
 .link{color:#cbe0ff;text-decoration:none;text-underline-offset:3px}
 .link:hover{text-decoration:underline}
+
+/* Seat grid responsive */
+.seat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width: 480px){
+  .seat-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* Responsiveness */
+@media (max-width: 640px){
+  .container{padding:16px}
+  .h1{font-size:24px}
+  .h2{font-size:16px}
+  .row{gap:var(--space-3)}
+  .list.cards{grid-template-columns:1fr}
+}
+@media (min-width: 1200px){
+  .container{max-width:1200px}
+  .h1{font-size:32px}
+}
+
+/* Accessibility helper */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 
 
